@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ลงทะเบียนเข้าร่วมประชุม</title>
+    <script>
+        const eventLat = 18.17399104889568; // พิกัดสถานที่จัดงาน
+        const eventLng = 100.1758576084034; // พิกัดสถานที่จัดงาน
+        const maxDistance = 100; // 100 เมตร
+
+        // ตรวจสอบว่าผู้ใช้เคยลงทะเบียนแล้วหรือไม่
+        if(localStorage.getItem('registered') === 'true') {
+            document.body.innerHTML = "<h2>อุปกรณ์ของคุณได้ลงทะเบียนแล้ว</h2>";
+        } else {
+            function getLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(checkPosition, showError);
+                } else {
+                    alert("อุปกรณ์ของคุณไม่รองรับการระบุตำแหน่ง");
+                }
+            }
+
+            function checkPosition(position) {
+                let userLat = position.coords.latitude;
+                let userLng = position.coords.longitude;
+                let distance = calculateDistance(userLat, userLng, eventLat, eventLng);
+
+                if (distance <= maxDistance) {
+                    document.getElementById("status").innerHTML = "✅ คุณอยู่ในพื้นที่ สามารถลงทะเบียนได้";
+                    document.getElementById("registerLink").style.display = "block";
+                } else {
+                    document.getElementById("status").innerHTML = "❌ คุณอยู่นอกพื้นที่ลงทะเบียน";
+                }
+            }
+
+            function calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371000; // รัศมีโลกเป็นเมตร
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return R * c; // ระยะทางเป็นเมตร
+            }
+
+            function showError(error) {
+                alert("ไม่สามารถระบุตำแหน่งของคุณได้");
+            }
+
+            window.onload = getLocation;
+        }
+    </script>
+</head>
+<body>
+    <h2>ลงทะเบียนเข้าร่วมประชุม</h2>
+    <p id="status">⏳ กำลังตรวจสอบตำแหน่งของคุณ...</p>
+    <a id="registerLink" href="https://lookerstudio.google.com/reporting/b0238c42-7821-425e-8e6d-d7826e2b2d98/page/p_k329vuqykd" style="display:none;">
+        <button>ลงทะเบียน</button>
+    </a>
+</body>
+</html>
